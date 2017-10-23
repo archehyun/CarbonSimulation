@@ -5,7 +5,7 @@ import carbon.equipment.queue.QueueNode;
 public class OrderInfo extends QueueNode{
 	
 	
-	private int orderID;
+	private int orderID;// 오더 아이디
 	
 	public int getOrderID() {
 		return orderID;
@@ -15,6 +15,8 @@ public class OrderInfo extends QueueNode{
 	public static final int MESSATE_TYPE_QC = 1;
 
 	public static final int MESSATE_TYPE_AGV = 3;
+
+	public static final int MESSATE_TYPE_ATC = 4;
 	
 	
 	
@@ -35,7 +37,8 @@ public class OrderInfo extends QueueNode{
 
 	private String agvID;
 	
-	private int messageType;
+	private int messageType; // 메시지 타입
+	
 	public int getMessageType() {
 		return messageType;
 	}

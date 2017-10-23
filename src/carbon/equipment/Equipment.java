@@ -14,10 +14,10 @@ public abstract class Equipment implements IFEquipment, Runnable{
 	
 	public static final int TYPE_ATC = 3;
 	
-	public static final int STATE_IDLE = 0;
+	public static final int STATE_IDLE = 0; // 
 	public static final int STATE_BUSY = 1;
 	
-	protected boolean isReady;
+	protected boolean isReady; // 스레드 시작
 	
 	protected Thread thread;
 	
@@ -45,6 +45,7 @@ public abstract class Equipment implements IFEquipment, Runnable{
 	}
 	public Equipment(String id) {
 		this.ID = id;
+		this.setState(STATE_IDLE);
 		chennel = new QueueChennel();
 		manager.addEquipment(this);
 	}

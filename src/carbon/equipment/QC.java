@@ -36,13 +36,13 @@ public class QC extends Equipment implements Runnable{
 			System.out.println("qc process : "+this.getID());
 			
 			trolly.executeOrder(info);
-
 		
 		}
 	}
 
 	@Override
 	public void executeOrder(OrderInfo info) {
+		
 		info.setQcID(this.getID());
 		this.chennel.append(info);
 		
@@ -82,9 +82,6 @@ public class QC extends Equipment implements Runnable{
 		{
 			
 		}
-		
-		
-		
 	}
 	class QCTrolly extends Equipment
 	{

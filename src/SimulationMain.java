@@ -1,4 +1,5 @@
 import carbon.equipment.AGV;
+import carbon.equipment.ATC;
 import carbon.equipment.QC;
 import carbon.equipment.process.OrderGeneration;
 import carbon.equipment.process.ProcessManager;
@@ -16,6 +17,12 @@ public class SimulationMain {
 		AGV agv1 = new AGV("agv1");
 		AGV agv2 = new AGV("agv2");		
 		AGV agv3 = new AGV("agv3");
+		
+		
+		ATC atc1 = new ATC("atc1");
+		ATC atc2 = new ATC("atc2");
+		ATC atc3 = new ATC("atc3");
+		ATC atc4 = new ATC("atc4");
 		
 		ProcessManager manager = ProcessManager.getInstace();
 		manager.start();

@@ -7,13 +7,18 @@ public class AGV extends Equipment {
 	
 	public AGV(String id) {
 		super(id);
+		
 		this.equipmentType =Equipment.TYPE_AGV;
 		
 		this.setState(STATE_IDLE);
 	}
 
-	class AGVMovingModule extends MovingModule
+	class AGVMovingModule extends MovingModule implements Runnable
 	{
+		
+		protected boolean isReady; // 스레드 시작
+		
+		protected Thread thread;
 
 		@Override
 		public void moveUp() {
@@ -40,7 +45,24 @@ public class AGV extends Equipment {
 
 		@Override
 		public void moveTo(int toX, int toY) {
-			// TODO Auto-generated method stub
+			
+			
+		}
+
+		@Override
+		public void run() {
+			do
+			{
+				if(destinationX>x)
+				{
+					moveRight();
+				}
+				else if(destinationX<x)
+				{
+					moveLeft();
+				}
+			}
+			while(destinationX==x);
 			
 		}
 		

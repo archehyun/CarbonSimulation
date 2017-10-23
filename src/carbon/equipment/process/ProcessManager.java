@@ -120,9 +120,15 @@ public class ProcessManager implements Runnable{
 				break;
 			case OrderInfo.MESSATE_TYPE_AGV:
 				
+				System.out.println("===");
+				this.setOrderByIDLE(Equipment.TYPE_ATC,info);
+				
+				break;
+			case OrderInfo.MESSATE_TYPE_ATC:
+				
 				System.out.println("end: "+info);
 				
-				break;	
+				break;		
 			default:
 				break;
 			}
