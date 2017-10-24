@@ -12,35 +12,35 @@ public class AGV extends Equipment {
 		
 		this.setState(STATE_IDLE);
 	}
-
+	
+	AGVMovingModule module = new AGVMovingModule();
+	
 	class AGVMovingModule extends MovingModule implements Runnable
-	{
-		
-		protected boolean isReady; // 스레드 시작
+	{		
+		protected boolean isReady=false; // 스레드 시작
 		
 		protected Thread thread;
 
 		@Override
 		public void moveUp() {
-			
+			--y;
 		}
 
 		@Override
 		public void moveDown() {
-			// TODO Auto-generated method stub
+			++y;
 			
 		}
 
 		@Override
 		public void moveLeft() {
-			// TODO Auto-generated method stub
+			--x;
 			
 		}
 
 		@Override
 		public void moveRight() {
-			// TODO Auto-generated method stub
-			
+			++x;
 		}
 
 		@Override
@@ -62,18 +62,35 @@ public class AGV extends Equipment {
 					moveLeft();
 				}
 			}
-			while(destinationX==x);
+			while(destinationX==x&&isReady);
+			
+			OrderInfo info = new OrderInfo(OrderInfo.MESSATE_TYPE_AGV_AVIVAL);
+			
+			AGV.this.executeOrder(info);
 			
 		}
+		public void execute()
+		{
+			if(thread==null)
+			{
+				isReady=true;				
+				thread = new Thread(this);
+				thread.start();
+			}
+		}
 		
+		public void stop()
+		{
+			isReady = false;
+			
+			thread = null;
+		}
 	}
 
 	@Override
 	public void executeOrder(ProcessManager manager) {
-		this.chennel.append(manager.getOrder());
-		
+		this.chennel.append(manager.getOrder());		
 	}
-
 
 
 	public void run() {
@@ -83,29 +100,56 @@ public class AGV extends Equipment {
 			
 			System.out.println("AGV process : "+this.getID());
 			
+			switch (info.getMessageType()) {
 			
-			this.setState(STATE_BUSY);
+			case OrderInfo.MESSATE_TYPE_FROM_PROCESS:
+				
+				
+				this.setState(STATE_BUSY);
+				
+				this.setDestination(info.getBlockID());
+				
+				
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}			
+				this.setState(STATE_IDLE);
+				
+				
+				break;
+			case OrderInfo.MESSATE_TYPE_AGV_AVIVAL:
+				
+				info.setMessageType(OrderInfo.MESSATE_TYPE_FROM_AGV);
+				
+				this.sendMessage(info);
+				break;	
+
+			default:
+				break;
+			}
 			
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}			
-			this.setState(STATE_IDLE);
 			
-			info.setMessageType(OrderInfo.MESSATE_TYPE_AGV);
 			
-			this.sendMessage(info);
-		}
-		
+		}		
 	}
 
+
+
+	private void setDestination(Object blockID) {
+		
+		module.setDestination(0,0);
+		module.execute();
+		
+	}
 
 
 	@Override
 	public void executeOrder(OrderInfo info) {
 		
 		info.setAgvID(this.getID());
+		
 		this.chennel.append(info);
 		
 	}

@@ -10,18 +10,35 @@ public class OrderInfo extends QueueNode{
 	public int getOrderID() {
 		return orderID;
 	}
+	public static final int MESSATE_TYPE_FROM_PROCESS=0;
+	
 	public static final int MESSATE_TYPE_CREATE=0;
 
 	public static final int MESSATE_TYPE_QC = 1;
 
-	public static final int MESSATE_TYPE_AGV = 3;
+	public static final int MESSATE_TYPE_AGV_AVIVAL = 3;
 
 	public static final int MESSATE_TYPE_ATC = 4;
 	
+	public static final int MESSATE_TYPE_FROM_AGV = 2;
 	
+	public static final int MESSATE_TYPE_FROM_QC = 1;
+	
+	public static final int MESSATE_TYPE_FROM_ATC=3;
+	
+	public static final int COMMAND_AGV_GOTO=3;
 	
 	private String qcID;
 	
+	
+	private int command;
+	
+	public int getCommand() {
+		return command;
+	}
+	public void setCommand(int command) {
+		this.command = command;
+	}
 	public String getQcID() {
 		return qcID;
 	}
@@ -52,6 +69,10 @@ public class OrderInfo extends QueueNode{
 	public String toString()
 	{
 		return "["+this.getOrderID()+","+this.qcID+","+this.getAgvID()+"]";
+	}
+	public Object getBlockID() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

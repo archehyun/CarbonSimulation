@@ -79,7 +79,6 @@ public class ProcessManager implements Runnable{
 	}
 	private void setOrderByWorkCount(int equipmentType, OrderInfo order)
 	{
-		
 		Iterator<IFEquipment> iter = equipmentList.iterator();
 		
 		Equipment selectedEquipment=(Equipment) iter.next();
@@ -94,7 +93,6 @@ public class ProcessManager implements Runnable{
 			}
 		}
 		selectedEquipment.executeOrder(order);
-		
 	}	
 	
 
@@ -113,18 +111,17 @@ public class ProcessManager implements Runnable{
 				
 				break;
 				
-			case OrderInfo.MESSATE_TYPE_QC:			
+			case OrderInfo.MESSATE_TYPE_FROM_QC:
 				
 				this.setOrderByIDLE(Equipment.TYPE_AGV,info);
 				
 				break;
-			case OrderInfo.MESSATE_TYPE_AGV:
+			case OrderInfo.MESSATE_TYPE_FROM_AGV:
 				
-				System.out.println("===");
 				this.setOrderByIDLE(Equipment.TYPE_ATC,info);
 				
 				break;
-			case OrderInfo.MESSATE_TYPE_ATC:
+			case OrderInfo.MESSATE_TYPE_FROM_ATC:
 				
 				System.out.println("end: "+info);
 				

@@ -6,6 +6,11 @@ public abstract class MovingModule {
 	public int getDestinationX() {
 		return destinationX;
 	}
+	
+	public void setDestination(int destinationX,int destinationY) {
+		this.setDestinationX(destinationX);
+		this.setDestinationY(destinationY);
+	}
 	public void setDestinationX(int destinationX) {
 		this.destinationX = destinationX;
 	}
