@@ -144,6 +144,10 @@ public class QC extends Equipment implements Runnable{
 				
 				System.out.println("trolly process : "+this.getID());
 				
+				
+				
+				
+				
 				this.setState(STATE_BUSY);
 				
 				try {
