@@ -153,7 +153,7 @@ public class QC extends Equipment implements Runnable{
 				}			
 				this.setState(STATE_IDLE);
 				
-				info.setMessageType(OrderInfo.MESSATE_TYPE_QC);
+				info.setMessageType(OrderInfo.MESSATE_TYPE_FROM_QC);
 				
 				QC.this.updateWorkCount();
 				

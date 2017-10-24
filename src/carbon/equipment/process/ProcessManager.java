@@ -103,9 +103,11 @@ public class ProcessManager implements Runnable{
 		{	
 			OrderInfo info=(OrderInfo)chennel.poll();
 			
+			info.setMessageType(OrderInfo.MESSATE_TYPE_FROM_PROCESS);
+			
 			switch (info.getMessageType()) {
 			
-			case OrderInfo.MESSATE_TYPE_CREATE:
+			case OrderInfo.MESSATE_TYPE_CREATE:				
 				
 				this.setOrderByWorkCount(Equipment.TYPE_QC,info);
 				

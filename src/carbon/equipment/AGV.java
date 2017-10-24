@@ -129,9 +129,6 @@ public class AGV extends Equipment {
 			default:
 				break;
 			}
-			
-			
-			
 		}		
 	}
 
