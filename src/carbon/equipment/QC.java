@@ -5,7 +5,7 @@ import carbon.equipment.process.ProcessManager;
 
 public class QC extends Equipment implements Runnable{
 	
-	QCTrolly trolly;
+	QCTrolly trolly; // Æ®·Ñ¸®
 	
 	public QC(String id) {
 		super(id);
