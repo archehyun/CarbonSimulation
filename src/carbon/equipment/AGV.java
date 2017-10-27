@@ -102,7 +102,7 @@ public class AGV extends Equipment {
 			
 			switch (info.getMessageType()) {
 			
-			case OrderInfo.MESSATE_TYPE_FROM_PROCESS:
+			case OrderInfo.ORDER_AGV_INBOUND_WORK:
 				
 				
 				this.setState(STATE_BUSY);
@@ -124,6 +124,7 @@ public class AGV extends Equipment {
 				info.setMessageType(OrderInfo.MESSATE_TYPE_FROM_AGV);
 				
 				this.sendMessage(info);
+				
 				break;	
 
 			default:

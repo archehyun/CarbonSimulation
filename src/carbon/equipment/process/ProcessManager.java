@@ -16,13 +16,18 @@ public class ProcessManager implements Runnable{
 	
 	private static ProcessManager instance;
 	
-	LinkedList<IFEquipment> equipmentList;
+	private LinkedList<IFEquipment> equipmentList;
 	
-	QueueChennel chennel;
+	private QueueChennel chennel;
+	
+	
+	BlockManager blockManager;
 	 
 	private ProcessManager()
 	{
 		equipmentList = new LinkedList<IFEquipment>();
+		
+		blockManager = new BlockManager();
 		
 		chennel = new QueueChennel();
 	}
@@ -49,7 +54,7 @@ public class ProcessManager implements Runnable{
 	
 		chennel.append(message);
 	}
-	private void setOrderByIDLE(int equipmentType, OrderInfo order)
+	private void setOrderByIDLE(int equipmentType, OrderInfo order, int orderType)
 	{
 		new Thread()
 		{
@@ -73,11 +78,13 @@ public class ProcessManager implements Runnable{
 				}
 				while(selectedEquipment==null);
 				
+				order.setMessageType(orderType);
+				
 				selectedEquipment.executeOrder(order);
 			}
 		}.start();
 	}
-	private void setOrderByWorkCount(int equipmentType, OrderInfo order)
+	private void setOrderByWorkCount(int equipmentType, OrderInfo order, int orderType)
 	{
 		Iterator<IFEquipment> iter = equipmentList.iterator();
 		
@@ -92,6 +99,7 @@ public class ProcessManager implements Runnable{
 				selectedEquipment = item;
 			}
 		}
+		order.setMessageType(orderType);
 		selectedEquipment.executeOrder(order);
 	}	
 	
@@ -103,27 +111,30 @@ public class ProcessManager implements Runnable{
 		{	
 			OrderInfo info=(OrderInfo)chennel.poll();
 			
-			info.setMessageType(OrderInfo.MESSATE_TYPE_FROM_PROCESS);
 			
 			switch (info.getMessageType()) {
 			
 			case OrderInfo.MESSATE_TYPE_CREATE:				
 				
-				this.setOrderByWorkCount(Equipment.TYPE_QC,info);
+				this.setOrderByWorkCount(Equipment.TYPE_QC,info,OrderInfo.ORDER_QC_INBOUND_WORK);
 				
 				break;
 				
-			case OrderInfo.MESSATE_TYPE_FROM_QC:
+			case OrderInfo.QC_INBOUND_WORK_END:
 				
-				this.setOrderByIDLE(Equipment.TYPE_AGV,info);
+				System.out.println("qc work end");
+				
+				blockManager.selectBlockNumber();
+				
+				this.setOrderByIDLE(Equipment.TYPE_AGV,info,OrderInfo.ORDER_AGV_INBOUND_WORK);
 				
 				break;
-			case OrderInfo.MESSATE_TYPE_FROM_AGV:
+			case OrderInfo.AGV_INBOUND_WORK_END:
 				
-				this.setOrderByIDLE(Equipment.TYPE_ATC,info);
+				this.setOrderByIDLE(Equipment.TYPE_ATC,info,OrderInfo.ORDER_ATC_INBOUND_WORK);
 				
 				break;
-			case OrderInfo.MESSATE_TYPE_FROM_ATC:
+			case OrderInfo.ATC_INBOUND_WORK_END:
 				
 				System.out.println("end: "+info);
 				

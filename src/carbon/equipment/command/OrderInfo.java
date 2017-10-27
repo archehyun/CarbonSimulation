@@ -14,7 +14,7 @@ public class OrderInfo extends QueueNode{
 	
 	public static final int MESSATE_TYPE_CREATE=0;
 
-	public static final int MESSATE_TYPE_QC = 1;
+	
 
 	public static final int MESSATE_TYPE_AGV_AVIVAL = 3;
 
@@ -22,11 +22,41 @@ public class OrderInfo extends QueueNode{
 	
 	public static final int MESSATE_TYPE_FROM_AGV = 2;
 	
-	public static final int MESSATE_TYPE_FROM_QC = 1;
 	
-	public static final int MESSATE_TYPE_FROM_ATC=3;
+	public static final int QC_INBOUND_WORK_END = 1;
+	
+	public static final int ATC_INBOUND_WORK_END=3;
+	
+	public static final int AGV_INBOUND_WORK_END = 5;
+	
+	
+	
+	public static final int ORDER_QC_INBOUND_WORK = 1;
+
+	public static final int ORDER_AGV_INBOUND_WORK = 0;
+
+	public static final int ORDER_ATC_INBOUND_WORK = 0;
+	
+	
+	public static final int QC_OUTBOUND_WORK_END = 1;
+	
+	public static final int ATC_OUTBOUND_WORK_END=3;
+	
+	public static final int AGV_OUTBOUND_WORK_END = 5;
+	
+	
+	
+	public static final int ORDER_QC_OUTBOUND_WORK = 1;
+
+	public static final int ORDER_AGV_OUTBOUND_WORK = 0;
+
+	public static final int ORDER_ATC_OUTBOUND_WORK = 0;
+	
+	
 	
 	public static final int COMMAND_AGV_GOTO=3;
+
+	
 	
 	private String qcID;
 	

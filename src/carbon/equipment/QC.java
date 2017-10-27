@@ -21,7 +21,6 @@ public class QC extends Equipment implements Runnable{
 	public void executeOrder(ProcessManager manager) {
 
 		OrderInfo qcOrder=manager.getOrder();
-
 		this.chennel.append(qcOrder);
 
 	}
@@ -85,8 +84,7 @@ public class QC extends Equipment implements Runnable{
 	}
 	class QCTrolly extends Equipment
 	{
-		MovingModule movingModule;
-		
+		MovingModule movingModule;		
 
 		public QCTrolly(String id) {
 			super(id);
@@ -94,7 +92,7 @@ public class QC extends Equipment implements Runnable{
 				
 				@Override
 				public void moveUp() {
-					// TODO Auto-generated method stub
+					
 					
 				}
 				
@@ -142,10 +140,6 @@ public class QC extends Equipment implements Runnable{
 			{	
 				OrderInfo info=(OrderInfo)chennel.poll();
 				
-				System.out.println("trolly process : "+this.getID());
-				
-				
-				
 				
 				
 				this.setState(STATE_BUSY);
@@ -157,11 +151,13 @@ public class QC extends Equipment implements Runnable{
 				}			
 				this.setState(STATE_IDLE);
 				
-				info.setMessageType(OrderInfo.MESSATE_TYPE_FROM_QC);
+				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
 				
 				QC.this.updateWorkCount();
 				
 				this.sendMessage(info);
+				System.out.println("trolly process end: "+this.getID());
+				
 			}
 			
 		}
