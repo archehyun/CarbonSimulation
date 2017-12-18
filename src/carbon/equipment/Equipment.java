@@ -1,12 +1,22 @@
 package carbon.equipment;
 
+import org.jdom.Element;
+
 import carbon.equipment.command.OrderInfo;
 import carbon.equipment.process.ProcessManager;
 import carbon.equipment.queue.QueueChennel;
+import carbon.view.XMLLoad;
+import local.maps.model.IFLocation;
 
-public abstract class Equipment implements IFEquipment, Runnable{
+public abstract class Equipment implements IFEquipment, Runnable, IFLocation{
+
+	
+	int x,y;
+	protected Element viewInfo;
 	
 	protected int workCount;
+	
+	XMLLoad load;
 	
 	public static final int TYPE_QC = 1;
 	
@@ -58,8 +68,10 @@ public abstract class Equipment implements IFEquipment, Runnable{
 	public void equipmentStart() {
 		if(thread ==null)
 		{
+			
 			isReady=true;
 			thread = new Thread(this);
+			thread.setName(this.getID());
 			thread.start();
 		}
 

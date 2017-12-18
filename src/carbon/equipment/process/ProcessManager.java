@@ -30,8 +30,14 @@ public class ProcessManager implements Runnable{
 		blockManager = new BlockManager();
 		
 		chennel = new QueueChennel();
+		
+		selectEquipment = new SelectEquipment();
 	}
 	
+	public LinkedList<IFEquipment> getEquipmentList() {
+		return equipmentList;
+	}
+
 	public void addEquipment(IFEquipment equipment)
 	{
 		equipmentList.add(equipment);
@@ -54,12 +60,76 @@ public class ProcessManager implements Runnable{
 	
 		chennel.append(message);
 	}
+	SelectEquipment selectEquipment;
+	class SelectEquipment implements Runnable
+	{
+		
+		OrderInfo order=null;
+		private QueueChennel chennel;
+		public SelectEquipment() {
+			chennel = new QueueChennel();
+			this.start();
+		}
+		public synchronized void setOrder(OrderInfo info)
+		{
+			chennel.append(order);
+		}
+		
+		private synchronized void setOrderByIDLE(int equipmentType, OrderInfo order, int orderType)
+		{
+			Equipment selectedEquipment=null;
+			
+			do
+			{
+				Iterator<IFEquipment> iter = equipmentList.iterator();
+				
+				while(iter.hasNext())
+				{
+					Equipment item = (Equipment) iter.next();
+					
+					if(item.getEquipmentType()==equipmentType&&item.getState()==Equipment.STATE_IDLE)
+					{				
+						
+						System.out.println("State:"+item.getState());
+						selectedEquipment = item;
+					}
+				}
+			}
+			while(selectedEquipment==null);
+			
+			order.setMessageType(orderType);
+			
+			selectedEquipment.executeOrder(order);
+		}
+		@Override
+		public void run() {
+			
+			
+			while(true)
+			{
+				OrderInfo info =(OrderInfo) chennel.poll();
+				
+				this.setOrderByIDLE(Equipment.TYPE_AGV,info,OrderInfo.ORDER_AGV_INBOUND_WORK);
+				
+				
+			}
+			
+		}
+		public void start()
+		{
+			Thread thread = new Thread(this);
+			thread.start();
+		}
+		
+	}
 	private void setOrderByIDLE(int equipmentType, OrderInfo order, int orderType)
 	{
 		new Thread()
 		{
+			
 			public void run()
 			{
+				this.setName("set Order");
 				Equipment selectedEquipment=null;
 				
 				do
@@ -72,6 +142,8 @@ public class ProcessManager implements Runnable{
 						
 						if(item.getEquipmentType()==equipmentType&&item.getState()==Equipment.STATE_IDLE)
 						{				
+							
+							System.out.println("State:"+item.getState());
 							selectedEquipment = item;
 						}
 					}
@@ -94,8 +166,11 @@ public class ProcessManager implements Runnable{
 		{
 			Equipment item = (Equipment) iter.next();
 			
-			if(item.getEquipmentType()==equipmentType&&item.getWorkCount()<selectedEquipment.getWorkCount())
-			{				
+			if(item.getEquipmentType()==equipmentType&&
+					item.getWorkCount()<selectedEquipment.getWorkCount()
+					&&item.getState()==Equipment.STATE_IDLE)
+			{
+				
 				selectedEquipment = item;
 			}
 		}
@@ -116,6 +191,7 @@ public class ProcessManager implements Runnable{
 			
 			case OrderInfo.MESSATE_TYPE_CREATE:				
 				
+				
 				this.setOrderByWorkCount(Equipment.TYPE_QC,info,OrderInfo.ORDER_QC_INBOUND_WORK);
 				
 				break;
@@ -125,13 +201,14 @@ public class ProcessManager implements Runnable{
 				System.out.println("qc work end");
 				
 				blockManager.selectBlockNumber();
-				
-				this.setOrderByIDLE(Equipment.TYPE_AGV,info,OrderInfo.ORDER_AGV_INBOUND_WORK);
+				this.selectEquipment.setOrder(info);
+				/*this.setOrderByIDLE(Equipment.TYPE_AGV,info,OrderInfo.ORDER_AGV_INBOUND_WORK);
+				this.setOrderByIDLE(Equipment.TYPE_ATC,info,OrderInfo.ORDER_AGV_INBOUND_WORK);*/
 				
 				break;
 			case OrderInfo.AGV_INBOUND_WORK_END:
-				
-				this.setOrderByIDLE(Equipment.TYPE_ATC,info,OrderInfo.ORDER_ATC_INBOUND_WORK);
+				this.selectEquipment.setOrder(info);
+				//this.setOrderByIDLE(Equipment.TYPE_ATC,info,OrderInfo.ORDER_ATC_INBOUND_WORK);
 				
 				break;
 			case OrderInfo.ATC_INBOUND_WORK_END:

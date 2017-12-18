@@ -1,20 +1,52 @@
 package carbon.equipment;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
+
 import carbon.equipment.command.OrderInfo;
 import carbon.equipment.process.ProcessManager;
+import carbon.view.XMLLoad;
+import local.maps.LocalMap;
 
 public class QC extends Equipment implements Runnable{
 	
+	
+	QCMoveingModule movingModule;
+	
 	QCTrolly trolly; // 飘费府
+	
+	private int width=50;
+	
+	private int height=50;
 	
 	public QC(String id) {
 		super(id);
+		
 		this.equipmentType =Equipment.TYPE_QC;
+		
+		movingModule = new QCMoveingModule();
 		
 		System.out.println("QC 积己:"+this.getID());
 		
 		trolly = new QCTrolly(this.getID()+"-1");
+		
+		load =XMLLoad.getInstace();
+		
+		viewInfo = load.getEquipmentInfo("qc");
+		
+		width =  Integer.parseInt(viewInfo.getAttribute("width").getValue());
+		height =  Integer.parseInt(viewInfo.getAttribute("height").getValue());
+		
 				
+	}
+	public void setLocation(int x, int y)
+	{
+		this.x=x;
+		this.y=y;
+		movingModule.setX(x);
+		movingModule.setY(y);
+		trolly.setLocation(x, y);
 	}
 
 	@Override
@@ -30,9 +62,7 @@ public class QC extends Equipment implements Runnable{
 	public void run() {
 		while(isReady)
 		{	
-			OrderInfo info=(OrderInfo)chennel.poll();
-			
-			System.out.println("qc process : "+this.getID());
+			OrderInfo info=(OrderInfo)chennel.poll();			
 			
 			trolly.executeOrder(info);
 		
@@ -48,7 +78,6 @@ public class QC extends Equipment implements Runnable{
 	}
 	class QCMoveingModule extends MovingModuleAdapter implements Runnable
 	{
-		Thread thread;
 		
 		@Override
 		public void moveRight() {
@@ -82,23 +111,38 @@ public class QC extends Equipment implements Runnable{
 			
 		}
 	}
+	
 	class QCTrolly extends Equipment
 	{
-		MovingModule movingModule;		
+		MovingModule trollyMovingModule;		
 
 		public QCTrolly(String id) {
 			super(id);
-			movingModule = new MovingModule() {
+			trollyMovingModule = new MovingModule() {
 				
 				@Override
 				public void moveUp() {
-					
+					y--;
 					
 				}
 				
 				@Override
 				public void moveTo(int toX, int toY) {
-					// TODO Auto-generated method stub
+					do
+					{
+						if(toY>y)
+							moveDown();
+						else							
+						{
+							moveUp();
+						}
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}	
+						
+					}while(toY!=y);
 					
 				}
 				
@@ -116,7 +160,7 @@ public class QC extends Equipment implements Runnable{
 				
 				@Override
 				public void moveDown() {
-					// TODO Auto-generated method stub
+					y++;
 					
 				}
 			};
@@ -138,30 +182,91 @@ public class QC extends Equipment implements Runnable{
 		public void run() {
 			while(isReady)
 			{	
-				OrderInfo info=(OrderInfo)chennel.poll();
+				OrderInfo info=(OrderInfo)chennel.poll();							
+				QC.this.updateWorkCount();
+				QC.this.setState(STATE_BUSY);
 				
+				trollyMovingModule.moveTo(trollyMovingModule.x-2, 100);
 				
-				
-				this.setState(STATE_BUSY);
-				
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}			
-				this.setState(STATE_IDLE);
+				trollyMovingModule.moveTo(trollyMovingModule.x-2, 45);
+						
+				QC.this.setState(STATE_IDLE);
 				
 				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
 				
-				QC.this.updateWorkCount();
-				
 				this.sendMessage(info);
+				
 				System.out.println("trolly process end: "+this.getID());
 				
 			}
 			
 		}
+
+		@Override
+		public Point getLocation() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void setLocation(int x, int y) {
+			trollyMovingModule.setX(x);
+			trollyMovingModule.setY(y);
+			
+		}
+
+		@Override
+		public void update(LocalMap map) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void draw(Graphics g) {
+			g.setColor(Color.red);
+			g.fillRect(trollyMovingModule.x-2,trollyMovingModule.y,  width+5, height/4);
+			
+		}
+
+		@Override
+		public void setLabelView(boolean isLabelView) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public boolean isEnter(Point mousePoint) {
+			// TODO Auto-generated method stub
+			return false;
+		}
 		
+	}
+	@Override
+	public Point getLocation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void update(LocalMap map) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void draw(Graphics g) {
+		g.setColor(Color.BLACK);
+		g.drawRect(movingModule.x, movingModule.y, width, height);
+		g.drawString(this.getWorkCount()+"锅", movingModule.x, movingModule.y);
+		
+	}
+	@Override
+	public void setLabelView(boolean isLabelView) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public boolean isEnter(Point mousePoint) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	

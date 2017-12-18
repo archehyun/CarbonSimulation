@@ -9,7 +9,7 @@ public class OrderGeneration implements Runnable{
 	protected Thread thread;
 	
 	private int orderID;
-	
+	OrderInfo info;
 	ProcessManager manager = ProcessManager.getInstace();
 
 	@Override
@@ -18,7 +18,7 @@ public class OrderGeneration implements Runnable{
 		{
 			try {
 				
-				OrderInfo info = new OrderInfo(orderID++);
+				info = new OrderInfo(orderID++);
 				
 				manager.appendMessage(info);
 				
