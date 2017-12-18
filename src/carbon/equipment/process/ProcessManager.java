@@ -18,8 +18,7 @@ public class ProcessManager implements Runnable{
 	
 	private LinkedList<IFEquipment> equipmentList;
 	
-	private QueueChennel chennel;
-	
+	private QueueChennel chennel;	
 	
 	BlockManager blockManager;
 	 
@@ -31,7 +30,7 @@ public class ProcessManager implements Runnable{
 		
 		chennel = new QueueChennel();
 		
-		selectEquipment = new SelectEquipment();
+		selectProcess = new SelectProcess(equipmentList);
 	}
 	
 	public LinkedList<IFEquipment> getEquipmentList() {
@@ -60,102 +59,10 @@ public class ProcessManager implements Runnable{
 	
 		chennel.append(message);
 	}
-	SelectEquipment selectEquipment;
-	class SelectEquipment implements Runnable
-	{
-		
-		OrderInfo order=null;
-		private QueueChennel chennel;
-		public SelectEquipment() {
-			chennel = new QueueChennel();
-			this.start();
-		}
-		public synchronized void setOrder(OrderInfo info)
-		{
-			chennel.append(order);
-		}
-		
-		private synchronized void setOrderByIDLE(int equipmentType, OrderInfo order, int orderType)
-		{
-			Equipment selectedEquipment=null;
-			
-			do
-			{
-				Iterator<IFEquipment> iter = equipmentList.iterator();
-				
-				while(iter.hasNext())
-				{
-					Equipment item = (Equipment) iter.next();
-					
-					if(item.getEquipmentType()==equipmentType&&item.getState()==Equipment.STATE_IDLE)
-					{				
-						
-						System.out.println("State:"+item.getState());
-						selectedEquipment = item;
-					}
-				}
-			}
-			while(selectedEquipment==null);
-			
-			order.setMessageType(orderType);
-			
-			selectedEquipment.executeOrder(order);
-		}
-		@Override
-		public void run() {
-			
-			
-			while(true)
-			{
-				OrderInfo info =(OrderInfo) chennel.poll();
-				
-				this.setOrderByIDLE(Equipment.TYPE_AGV,info,OrderInfo.ORDER_AGV_INBOUND_WORK);
-				
-				
-			}
-			
-		}
-		public void start()
-		{
-			Thread thread = new Thread(this);
-			thread.start();
-		}
-		
-	}
-	private void setOrderByIDLE(int equipmentType, OrderInfo order, int orderType)
-	{
-		new Thread()
-		{
-			
-			public void run()
-			{
-				this.setName("set Order");
-				Equipment selectedEquipment=null;
-				
-				do
-				{
-					Iterator<IFEquipment> iter = equipmentList.iterator();
-					
-					while(iter.hasNext())
-					{
-						Equipment item = (Equipment) iter.next();
-						
-						if(item.getEquipmentType()==equipmentType&&item.getState()==Equipment.STATE_IDLE)
-						{				
-							
-							System.out.println("State:"+item.getState());
-							selectedEquipment = item;
-						}
-					}
-				}
-				while(selectedEquipment==null);
-				
-				order.setMessageType(orderType);
-				
-				selectedEquipment.executeOrder(order);
-			}
-		}.start();
-	}
+	
+	SelectProcess selectProcess;
+
+	
 	private void setOrderByWorkCount(int equipmentType, OrderInfo order, int orderType)
 	{
 		Iterator<IFEquipment> iter = equipmentList.iterator();
@@ -183,14 +90,14 @@ public class ProcessManager implements Runnable{
 	public void run() {
 		
 		while(isReady)
-		{	
+		{
+			try{
 			OrderInfo info=(OrderInfo)chennel.poll();
 			
 			
 			switch (info.getMessageType()) {
 			
 			case OrderInfo.MESSATE_TYPE_CREATE:				
-				
 				
 				this.setOrderByWorkCount(Equipment.TYPE_QC,info,OrderInfo.ORDER_QC_INBOUND_WORK);
 				
@@ -201,14 +108,15 @@ public class ProcessManager implements Runnable{
 				System.out.println("qc work end");
 				
 				blockManager.selectBlockNumber();
-				this.selectEquipment.setOrder(info);
-				/*this.setOrderByIDLE(Equipment.TYPE_AGV,info,OrderInfo.ORDER_AGV_INBOUND_WORK);
-				this.setOrderByIDLE(Equipment.TYPE_ATC,info,OrderInfo.ORDER_AGV_INBOUND_WORK);*/
+				
+				this.selectProcess.setOrder(Equipment.TYPE_AGV, info);
+				
+				this.selectProcess.setOrder(Equipment.TYPE_ATC, info);
+				
 				
 				break;
 			case OrderInfo.AGV_INBOUND_WORK_END:
-				this.selectEquipment.setOrder(info);
-				//this.setOrderByIDLE(Equipment.TYPE_ATC,info,OrderInfo.ORDER_ATC_INBOUND_WORK);
+				this.selectProcess.setOrder(Equipment.TYPE_ATC, info);				
 				
 				break;
 			case OrderInfo.ATC_INBOUND_WORK_END:
@@ -219,6 +127,12 @@ public class ProcessManager implements Runnable{
 			default:
 				break;
 			}
+			}
+			catch(Exception e)
+			{
+				System.err.println(e.getMessage());
+			}
+			
 		}
 	}
 	

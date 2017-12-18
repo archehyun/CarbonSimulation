@@ -161,6 +161,12 @@ public class AGV extends Equipment {
 						{
 							moveUp();
 						}
+						if(toX>x)
+							moveRight();
+						else							
+						{
+							moveLeft();
+						}
 						try {
 							Thread.sleep(100);
 						} catch (InterruptedException e) {
@@ -207,18 +213,19 @@ public class AGV extends Equipment {
 		public void run() {
 			while(isReady)
 			{	
-				OrderInfo info=(OrderInfo)chennel.poll();							
+				OrderInfo info=(OrderInfo)chennel.poll();
+				
 				AGV.this.updateWorkCount();
+				
 				AGV.this.setState(STATE_BUSY);
 				
-				trollyMovingModule.moveTo(trollyMovingModule.x-2, 100);
+				trollyMovingModule.moveTo(info.x+15, info.y+15);
 				
-				trollyMovingModule.moveTo(trollyMovingModule.x-2, 45);
+				trollyMovingModule.moveTo(0, 0);
 						
 				AGV.this.setState(STATE_IDLE);
 				
 				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
-				
 				
 				
 				this.sendMessage(info);
@@ -232,11 +239,12 @@ public class AGV extends Equipment {
 		@Override
 		public Point getLocation() {
 			// TODO Auto-generated method stub
-			return null;
+			return new Point(module.x, module.y);
 		}
 
 		@Override
 		public void setLocation(int x, int y) {
+			
 			trollyMovingModule.setX(x);
 			trollyMovingModule.setY(y);
 			
@@ -291,13 +299,13 @@ public class AGV extends Equipment {
 	@Override
 	public Point getLocation() {
 		// TODO Auto-generated method stub
-		return null;
+		return new Point(module.getX(), module.getY());
 	}
 
 
 	@Override
 	public void setLocation(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

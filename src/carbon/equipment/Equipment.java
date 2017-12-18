@@ -1,5 +1,7 @@
 package carbon.equipment;
 
+import java.awt.Point;
+
 import org.jdom.Element;
 
 import carbon.equipment.command.OrderInfo;
@@ -13,7 +15,6 @@ public abstract class Equipment implements IFEquipment, Runnable, IFLocation{
 	
 	int x,y;
 	protected Element viewInfo;
-	
 	protected int workCount;
 	
 	XMLLoad load;

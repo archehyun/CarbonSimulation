@@ -8,6 +8,7 @@ import org.jdom.Element;
 
 import carbon.equipment.command.OrderInfo;
 import carbon.equipment.process.ProcessManager;
+import carbon.equipment.queue.QueueChennel;
 import carbon.view.XMLLoad;
 import local.maps.LocalMap;
 
@@ -18,9 +19,13 @@ public class ATC extends Equipment{
 	int h;
 	ATCTrolly trolly;
 	
+	int colSize;
+	int rowSize;
+	
 	ATCMoveingModule movingModule;
 	public ATC(String id) {
 		super(id);
+		
 		this.equipmentType =Equipment.TYPE_ATC;
 		
 		load =XMLLoad.getInstace();
@@ -31,7 +36,11 @@ public class ATC extends Equipment{
 		
 		w =  Integer.parseInt(viewInfo.getAttribute("width").getValue());
 		
+		colSize = w/21;
+		 
+		
 		h =  Integer.parseInt(viewInfo.getAttribute("height").getValue());
+		rowSize = h/4;
 		
 		trolly = new ATCTrolly(getID()+"-1");
 		
@@ -39,6 +48,14 @@ public class ATC extends Equipment{
 	
 	class ATCMoveingModule extends MovingModuleAdapter implements Runnable
 	{
+		protected QueueChennel chennel;
+		public ATCMoveingModule() {
+			chennel = new QueueChennel();
+			isReady = true;
+			Thread thread = new Thread(this);
+			thread.start();
+			
+		}
 		
 		@Override
 		public void moveRight() {
@@ -48,28 +65,58 @@ public class ATC extends Equipment{
 		
 		@Override
 		public void moveLeft() {
-			y--;			
+			x--;			
 		}
-
 		@Override
-		public void run() {
+		public void moveTo(int toX, int toY) {
 			do
 			{
-				if(destinationX>x)
-				{
+				if(toX>x)
 					moveRight();
-				}
-				else if(destinationX<x)
+				else							
 				{
 					moveLeft();
 				}
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}	
+				
+			}while(toX!=x);
+			
+		}
+		@Override
+		public void run() {
+			
+			
+			while(isReady)
+			{	
+				OrderInfo info=(OrderInfo)chennel.poll();
+				
+				ATC.this.updateWorkCount();
+				
+				ATC.this.setState(STATE_BUSY);
+				
+				movingModule.moveTo(ATC.this.x+100, ATC.this.y+20);
+				
+				movingModule.moveTo(ATC.this.x, ATC.this.y);
+						
+				ATC.this.setState(STATE_IDLE);
+				
+				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
+				
 			}
-			while(destinationX==x);
 			
 		}
 		public void execute()
 		{
 			
+		}
+		
+		public void executeOrder(OrderInfo info) {
+			
+			chennel.append(info);
 		}
 	}
 
@@ -103,11 +150,11 @@ public class ATC extends Equipment{
 				public void moveTo(int toX, int toY) {
 					do
 					{
-						if(toX>x)
-							moveRight();
+						if(toY>y)
+							moveDown();
 						else							
 						{
-							moveLeft();
+							moveUp();
 						}
 						try {
 							Thread.sleep(100);
@@ -115,7 +162,7 @@ public class ATC extends Equipment{
 							e.printStackTrace();
 						}	
 						
-					}while(toX!=x);
+					}while(toY!=y);
 					
 				}
 				
@@ -161,14 +208,13 @@ public class ATC extends Equipment{
 				
 				ATC.this.setState(STATE_BUSY);
 				
-				trollyMovingModule.moveTo(ATC.this.x+100, 100);
+				trollyMovingModule.moveTo(ATC.this.x+100, ATC.this.y+20);
 				
-				trollyMovingModule.moveTo(ATC.this.x, 45);
+				trollyMovingModule.moveTo(ATC.this.x, ATC.this.y);
 						
 				ATC.this.setState(STATE_IDLE);
 				
 				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
-				
 				
 				
 				this.sendMessage(info);
@@ -182,7 +228,7 @@ public class ATC extends Equipment{
 		@Override
 		public Point getLocation() {
 			// TODO Auto-generated method stub
-			return null;
+			return new Point(movingModule.x, movingModule.y);
 		}
 
 		@Override
@@ -202,7 +248,7 @@ public class ATC extends Equipment{
 		@Override
 		public void draw(Graphics g) {
 			g.setColor(Color.red);
-			g.fillRect(trollyMovingModule.x-2,trollyMovingModule.y-2,  15, h+4);
+			g.fillRect(movingModule.x-2,trollyMovingModule.y-2,  22, 5);
 			
 		}
 
@@ -227,6 +273,8 @@ public class ATC extends Equipment{
 		{	
 			OrderInfo info=(OrderInfo)chennel.poll();
 			
+			movingModule.executeOrder(info);
+			
 			trolly.executeOrder(info);
 		}
 		
@@ -235,7 +283,7 @@ public class ATC extends Equipment{
 	@Override
 	public Point getLocation() {
 		// TODO Auto-generated method stub
-		return null;
+		return new Point(movingModule.x, movingModule.y);
 	}
 
 	@Override
@@ -260,7 +308,9 @@ public class ATC extends Equipment{
 		
 		g.setColor(Color.YELLOW);		
 
-		g.fillRect(movingModule.x, movingModule.y, w, h);	
+		g.fillRect(movingModule.x, movingModule.y, w, h);
+		g.setColor(Color.BLACK);
+		
 		
 	}
 

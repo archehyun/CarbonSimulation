@@ -205,7 +205,7 @@ public class QC extends Equipment implements Runnable{
 		@Override
 		public Point getLocation() {
 			// TODO Auto-generated method stub
-			return null;
+			return new Point(movingModule.x, movingModule.y);
 		}
 
 		@Override
@@ -244,7 +244,7 @@ public class QC extends Equipment implements Runnable{
 	@Override
 	public Point getLocation() {
 		// TODO Auto-generated method stub
-		return null;
+		return new Point(45, 45);
 	}
 	@Override
 	public void update(LocalMap map) {

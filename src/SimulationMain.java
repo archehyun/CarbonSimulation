@@ -23,11 +23,11 @@ public class SimulationMain {
 		ATC atc1 = new ATC("atc1");
 		atc1.setLocation(30, 250);
 		ATC atc2 = new ATC("atc2");
-		atc2.setLocation(150, 250);
+		atc2.setLocation(250, 250);
 		ATC atc3 = new ATC("atc3");
 		atc3.setLocation(30, 350);
 		ATC atc4 = new ATC("atc4");
-		atc4.setLocation(150, 350);
+		atc4.setLocation(250, 350);
 		
 
 		

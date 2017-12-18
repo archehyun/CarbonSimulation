@@ -5,6 +5,9 @@ import carbon.equipment.queue.QueueNode;
 public class OrderInfo extends QueueNode{
 	
 	
+	public int x;
+	public int y;
+	
 	private int orderID;// 오더 아이디
 	
 	public int getOrderID() {
