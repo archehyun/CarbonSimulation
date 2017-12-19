@@ -1,0 +1,16 @@
+<model name="OHS 터미널">
+	<background name="background">
+
+	</background>
+
+	<qc name="qc1-1" id="qc1-1" x="100" y="100" width="25"  height="150"></qc>
+	
+	<agv name="agv1-1" id="agv1-1" x="150" y="150"></agv>
+	<atc name="atc0-0" id="atc0-0" x="75" y="220" width="20" height="45" index="0"></atc>
+	<block name="block0" index="0" x="30" y="225" row="20" col="10"></block>
+	
+	
+
+	
+
+</model>
