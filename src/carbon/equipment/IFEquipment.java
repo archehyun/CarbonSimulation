@@ -15,6 +15,7 @@ public interface IFEquipment{
 	public void equipmentStop();
 	
 	public Point getLocation();
+	
 	public void setLocation(int x, int y);
 	
 	

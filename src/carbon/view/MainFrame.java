@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import carbon.equipment.process.BlockManager;
 import carbon.equipment.process.OrderGeneration;
 import carbon.equipment.process.ProcessManager;
 import local.maps.MapConfig;
@@ -25,9 +26,20 @@ public class MainFrame extends JFrame{
 	
 	SimulationMap map = new SimulationMap(400, 300);
 
+	private BlockManager blockManager;
+
 	public void createAndUpdateUI()
 	{		
 		MapConfig config = new MapConfig(map);
+		
+		blockManager = BlockManager.getInstace();
+		blockManager.init();
+		List li2 = blockManager.getBlockList();
+		Iterator<IFLocation> iter2 = li2.iterator();
+		while(iter2.hasNext())
+		{
+			map.addLocation(iter2.next());
+		}
 		
 		List li=ProcessManager.getInstace().getEquipmentList();
 		
@@ -36,7 +48,7 @@ public class MainFrame extends JFrame{
 		while(iter.hasNext())
 		{
 			map.addLocation(iter.next());
-		}		
+		}	
 		
 		JPanel pnControl = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		
@@ -76,7 +88,7 @@ public class MainFrame extends JFrame{
 		this.getContentPane().add(pnControl, BorderLayout.SOUTH);
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setSize(700,500);
+		this.setSize(250,500);
 		this.setVisible(true);
 	}
 

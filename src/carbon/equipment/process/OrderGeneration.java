@@ -19,7 +19,8 @@ public class OrderGeneration implements Runnable{
 			try {
 				
 				info = new OrderInfo(orderID++);
-				
+				info.setEquipmentType(OrderInfo.EQUIPMENT_TYPE_QC);
+				info.setMessageType(OrderInfo.MESSATE_TYPE_CREATE);
 				manager.appendMessage(info);
 				
 				Thread.sleep(1000);

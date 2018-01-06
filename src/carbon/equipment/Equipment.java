@@ -14,7 +14,14 @@ public abstract class Equipment implements IFEquipment, Runnable, IFLocation{
 
 	
 	int x,y;
+	
+	protected int width;
+	
+	protected int height;
+	
+	Point location;
 	protected Element viewInfo;
+	
 	protected int workCount;
 	
 	XMLLoad load;
@@ -59,7 +66,15 @@ public abstract class Equipment implements IFEquipment, Runnable, IFLocation{
 		this.setState(STATE_IDLE);
 		chennel = new QueueChennel();
 		manager.addEquipment(this);
+		
+		location = new Point();
 	}
+	
+	public Point getLocation()
+	{
+		return location;
+	}
+
 	
 	public void sendMessage(OrderInfo message)
 	{

@@ -5,7 +5,9 @@ import java.awt.Graphics;
 import java.awt.Point;
 
 import carbon.equipment.command.OrderInfo;
+import carbon.equipment.process.BlockManager;
 import carbon.equipment.process.ProcessManager;
+import carbon.equipment.queue.QueueNode;
 import local.maps.LocalMap;
 
 public class AGV extends Equipment {
@@ -91,19 +93,18 @@ public class AGV extends Equipment {
 			thread = null;
 		}
 	}
-
+	OrderInfo agvOrder;
 	@Override
 	public void executeOrder(ProcessManager manager) {
 		this.chennel.append(manager.getOrder());		
 	}
-
-
+	InteralMessage message;
 	public void run() {
 		while(isReady)
 		{	
 			OrderInfo info=(OrderInfo)chennel.poll();
 			
-			System.out.println("AGV process : "+this.getID());
+			System.out.println("AGV process : "+this.getID()+", "+info.getMessageType() );
 			
 			switch (info.getMessageType()) {
 			
@@ -124,15 +125,29 @@ public class AGV extends Equipment {
 				
 				*/
 				break;
-			case OrderInfo.MESSATE_TYPE_AGV_AVIVAL:
+			case OrderInfo.AGV_INBOUND_WORK_END:
 				
-				info.setMessageType(OrderInfo.MESSATE_TYPE_FROM_AGV);
 				
+				System.out.println("agv send");
 				this.sendMessage(info);
 				
+				
 				break;	
-
+			case OrderInfo.MESSATE_TYPE_AGV_QC_AVIVAL:
+				
+				agvOrder = new OrderInfo();
+				agvOrder.x = info.blockX+info.bayIndex*BlockManager.conW;
+				agvOrder.y = info.blockY;
+				agvOrder.setEquipmentType(OrderInfo.EQUIPMENT_TYPE_AGV);				
+//				info.setMessageType(OrderInfo.AGV_INBOUND_WORK_END);
+				
+				System.out.println("arrrvla==="+info);
+				//trolly.executeOrder(info);
+				AGV.this.sendMessage(agvOrder);
+				
+				break;
 			default:
+				System.out.println("order error"+info.getMessageType());
 				break;
 			}
 		}		
@@ -219,18 +234,31 @@ public class AGV extends Equipment {
 				
 				AGV.this.setState(STATE_BUSY);
 				
-				trollyMovingModule.moveTo(info.x+15, info.y+15);
+				trollyMovingModule.moveTo(info.x, info.y);
 				
-				trollyMovingModule.moveTo(0, 0);
+				if(info.getEquipmentType()==OrderInfo.EQUIPMENT_TYPE_QC)
+				{
+					info.setMessageType(OrderInfo.MESSATE_TYPE_AGV_QC_AVIVAL);
+				}
+				
+				AGV.this.executeOrder(info);
+				
+/*				info.info.setEquipmentType(OrderInfo.EQUIPMENT_TYPE_AGV);
+				
+				info.info.setMessageType(OrderInfo.MESSATE_TYPE_AGV_AVIVAL);
+				
+				AGV.this.sendMessage(info);
+				
+				System.out.println("send===");
+				
+				trollyMovingModule.moveTo(info.info.blockX+info.info.bayIndex*BlockManager.conW, info.info.blockY);
 						
-				AGV.this.setState(STATE_IDLE);
-				
-				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
+				AGV.this.setState(STATE_IDLE);				
 				
 				
-				this.sendMessage(info);
+				AGV.this.executeOrder(info);
 				
-				System.out.println("trolly process end: "+this.getID());
+				System.out.println("agv process end: "+this.getID());*/
 				
 			}
 			
@@ -323,8 +351,18 @@ public class AGV extends Equipment {
 	 */
 	@Override
 	public void draw(Graphics g) {
+		
+		if(this.getState()==Equipment.STATE_BUSY)
+		{
 		g.setColor(Color.blue);
-		g.fillRect(trolly.trollyMovingModule.x, trolly.trollyMovingModule.y, 50, 10);
+		}
+		else
+		{
+			g.setColor(Color.green);
+		}
+		g.fillRect(trolly.trollyMovingModule.x, trolly.trollyMovingModule.y, 25, 10);
+		g.setColor(Color.white);
+		g.drawRect(trolly.trollyMovingModule.x, trolly.trollyMovingModule.y, 25, 10);
 		
 	}
 
@@ -340,6 +378,12 @@ public class AGV extends Equipment {
 	public boolean isEnter(Point mousePoint) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	class InteralMessage extends QueueNode
+	{
+		public int x;
+		public int y;
+		public OrderInfo info;
 	}
 
 }

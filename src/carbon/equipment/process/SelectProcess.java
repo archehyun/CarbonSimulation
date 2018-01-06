@@ -71,10 +71,8 @@ public class SelectProcess implements Runnable{
 		}
 		while(selectedEquipment==null);
 		
-		
-		order.x = selectedEquipment.getLocation().x;
-		order.y = selectedEquipment.getLocation().y;
-		
+		System.out.println(selectedEquipment+","+selectedEquipment.getLocation());
+
 		order.setMessageType(orderType);
 		
 		selectedEquipment.executeOrder(order);
@@ -87,12 +85,13 @@ public class SelectProcess implements Runnable{
 		{
 			SelectOrder info =(SelectOrder) chennel.poll();
 			
-			this.setOrderByIDLE(info.orderType,info,OrderInfo.ORDER_AGV_INBOUND_WORK);			
+			this.setOrderByIDLE(info.orderType,info.info,OrderInfo.ORDER_AGV_INBOUND_WORK);			
 			
 		}		
 	}
 	class SelectOrder extends OrderInfo
 	{
+		
 		public SelectOrder(int orderID) {
 			super(orderID);
 			// TODO Auto-generated constructor stub

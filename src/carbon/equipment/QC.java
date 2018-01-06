@@ -12,22 +12,27 @@ import local.maps.LocalMap;
 public class QC extends Equipment implements Runnable{
 	
 	
+	private int trollySpeed=50;
+	
+	public int getTrollySpeed() {
+		return trollySpeed;
+	}
+	public void setTrollySpeed(int trollySpeed) {
+		this.trollySpeed = trollySpeed;
+	}
+	
 	QCMoveingModule movingModule;
 	
 	QCTrolly trolly; // 飘费府
 	
-	private int width=50;
-	
-	private int height=50;
-	
 	public QC(String id) {
 		super(id);
+
 		
 		this.equipmentType =Equipment.TYPE_QC;
 		
-		movingModule = new QCMoveingModule();
+		movingModule = new QCMoveingModule();	
 		
-		System.out.println("QC 积己:"+this.getID());
 		
 		trolly = new QCTrolly(this.getID()+"-1");
 		
@@ -36,6 +41,7 @@ public class QC extends Equipment implements Runnable{
 		viewInfo = load.getEquipmentInfo("qc");
 		
 		width =  Integer.parseInt(viewInfo.getAttribute("width").getValue());
+		
 		height =  Integer.parseInt(viewInfo.getAttribute("height").getValue());
 		
 				
@@ -55,16 +61,35 @@ public class QC extends Equipment implements Runnable{
 		OrderInfo qcOrder=manager.getOrder();
 		this.chennel.append(qcOrder);
 
-	}
-	
+	}	
 
 	@Override
 	public void run() {
 		while(isReady)
 		{	
-			OrderInfo info=(OrderInfo)chennel.poll();			
+			OrderInfo info=(OrderInfo)chennel.poll();
 			
-			trolly.executeOrder(info);
+			System.out.println("qc order:"+info);
+			
+			switch (info.getMessageType()) {
+			case OrderInfo.MESSATE_TYPE_AGV_QC_AVIVAL:
+				this.trolly.executeOrder(info);
+				
+				break;
+			case OrderInfo.ORDER_QC_INBOUND_WORK:
+				
+				OrderInfo qcOrder = new OrderInfo();				
+				qcOrder.x = movingModule.x;
+				qcOrder.y = movingModule.y+height-15;
+				qcOrder.setMessageType(OrderInfo.AGV_INBOUND_WORK_CALL);
+				info.setQC(this);
+				sendMessage(qcOrder);
+				//this.trolly.executeOrder(info);
+				break;	
+
+			default:
+				break;
+			}		
 		
 		}
 	}
@@ -110,6 +135,8 @@ public class QC extends Equipment implements Runnable{
 		{
 			
 		}
+		
+
 	}
 	
 	class QCTrolly extends Equipment
@@ -137,7 +164,7 @@ public class QC extends Equipment implements Runnable{
 							moveUp();
 						}
 						try {
-							Thread.sleep(100);
+							Thread.sleep(getTrollySpeed());
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}	
@@ -176,7 +203,9 @@ public class QC extends Equipment implements Runnable{
 		public void executeOrder(OrderInfo info) {
 			this.chennel.append(info);
 			
-		}
+		}		
+		
+		
 
 		@Override
 		public void run() {
@@ -186,17 +215,23 @@ public class QC extends Equipment implements Runnable{
 				QC.this.updateWorkCount();
 				QC.this.setState(STATE_BUSY);
 				
+				info.x = movingModule.x;
+				
+				info.y = movingModule.y+height-15;
+				
 				trollyMovingModule.moveTo(trollyMovingModule.x-2, 100);
 				
 				trollyMovingModule.moveTo(trollyMovingModule.x-2, 45);
-						
-				QC.this.setState(STATE_IDLE);
+				
+			
+				QC.this.setState(STATE_IDLE);				
+		
 				
 				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
 				
 				this.sendMessage(info);
 				
-				System.out.println("trolly process end: "+this.getID());
+				System.out.println("qc trolly process end: "+this.getID()+", "+info.x+", "+info.y);
 				
 			}
 			
@@ -224,7 +259,7 @@ public class QC extends Equipment implements Runnable{
 		@Override
 		public void draw(Graphics g) {
 			g.setColor(Color.red);
-			g.fillRect(trollyMovingModule.x-2,trollyMovingModule.y,  width+5, height/4);
+			g.fillRect(trollyMovingModule.x-2,trollyMovingModule.y,  QC.this.width+5, QC.this.height/4);
 			
 		}
 
@@ -256,6 +291,9 @@ public class QC extends Equipment implements Runnable{
 		g.setColor(Color.BLACK);
 		g.drawRect(movingModule.x, movingModule.y, width, height);
 		g.drawString(this.getWorkCount()+"锅", movingModule.x, movingModule.y);
+		g.setColor(Color.gray);
+		g.drawRect(movingModule.x, movingModule.y+height-15, width, 15);
+		
 		
 	}
 	@Override
@@ -273,3 +311,4 @@ public class QC extends Equipment implements Runnable{
 
 
 }
+

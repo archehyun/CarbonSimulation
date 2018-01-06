@@ -7,6 +7,7 @@ import java.awt.Point;
 import org.jdom.Element;
 
 import carbon.equipment.command.OrderInfo;
+import carbon.equipment.process.BlockManager;
 import carbon.equipment.process.ProcessManager;
 import carbon.equipment.queue.QueueChennel;
 import carbon.view.XMLLoad;
@@ -15,14 +16,15 @@ import local.maps.LocalMap;
 public class ATC extends Equipment{
 	
 	private Element viewInfo;
-	int w;
-	int h;
+
 	ATCTrolly trolly;
 	
 	int colSize;
+	
 	int rowSize;
 	
 	ATCMoveingModule movingModule;
+	
 	public ATC(String id) {
 		super(id);
 		
@@ -34,13 +36,13 @@ public class ATC extends Equipment{
 		
 		viewInfo = load.getEquipmentInfo("atc");
 		
-		w =  Integer.parseInt(viewInfo.getAttribute("width").getValue());
+		width =  Integer.parseInt(viewInfo.getAttribute("width").getValue());
 		
-		colSize = w/21;
+		colSize = width/21;
 		 
 		
-		h =  Integer.parseInt(viewInfo.getAttribute("height").getValue());
-		rowSize = h/4;
+		height =  Integer.parseInt(viewInfo.getAttribute("height").getValue());
+		rowSize = height/4;
 		
 		trolly = new ATCTrolly(getID()+"-1");
 		
@@ -98,13 +100,12 @@ public class ATC extends Equipment{
 				
 				ATC.this.setState(STATE_BUSY);
 				
-				movingModule.moveTo(ATC.this.x+100, ATC.this.y+20);
+				movingModule.moveTo(ATC.this.x+info.bayIndex*BlockManager.conW+BlockManager.gap, ATC.this.y+20);
 				
-				movingModule.moveTo(ATC.this.x, ATC.this.y);
 						
 				ATC.this.setState(STATE_IDLE);
 				
-				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
+				info.setMessageType(OrderInfo.ATC_INBOUND_WORK_END);
 				
 			}
 			
@@ -207,18 +208,17 @@ public class ATC extends Equipment{
 				ATC.this.updateWorkCount();
 				
 				ATC.this.setState(STATE_BUSY);
+				trollyMovingModule.moveTo(movingModule.x, movingModule.y);
 				
-				trollyMovingModule.moveTo(ATC.this.x+100, ATC.this.y+20);
+				trollyMovingModule.moveTo(movingModule.x, movingModule.y+info.rowIndex*BlockManager.conH);
 				
-				trollyMovingModule.moveTo(ATC.this.x, ATC.this.y);
 						
 				ATC.this.setState(STATE_IDLE);
 				
 				info.setMessageType(OrderInfo.QC_INBOUND_WORK_END);
 				
-				
 				this.sendMessage(info);
-				
+				ATC.this.updateWorkCount();
 				System.out.println("trolly process end: "+this.getID());
 				
 			}
@@ -235,8 +235,6 @@ public class ATC extends Equipment{
 		public void setLocation(int x, int y) {
 			trollyMovingModule.setX(x);
 			trollyMovingModule.setY(y);
-			
-			
 		}
 
 		@Override
@@ -248,7 +246,7 @@ public class ATC extends Equipment{
 		@Override
 		public void draw(Graphics g) {
 			g.setColor(Color.red);
-			g.fillRect(movingModule.x-2,trollyMovingModule.y-2,  22, 5);
+			g.fillRect(movingModule.x-2,trollyMovingModule.y-2,  BlockManager.conH*2, BlockManager.conW*2);
 			
 		}
 
@@ -308,8 +306,9 @@ public class ATC extends Equipment{
 		
 		g.setColor(Color.YELLOW);		
 
-		g.fillRect(movingModule.x, movingModule.y, w, h);
+		g.fillRect(movingModule.x, movingModule.y, BlockManager.conH+1, (BlockManager.ROW+BlockManager.gap)*BlockManager.conH);
 		g.setColor(Color.BLACK);
+		g.drawString(this.getWorkCount()+"", movingModule.x, movingModule.y);
 		
 		
 	}
